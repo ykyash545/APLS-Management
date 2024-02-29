@@ -4,7 +4,7 @@ import pandas as pd
 import secrets
 import string
 from passlib.hash import pbkdf2_sha256
-
+from PIL import Image
 def generate_random_password(length=10):
     alphabet = string.ascii_letters + string.digits + string.punctuation
     password = ''.join(secrets.choice(alphabet) for i in range(length))
@@ -278,8 +278,12 @@ def generate_invoice(patient_id):
 # Main function to run the Streamlit app
 def main():
     create_table(create_connection())
+
     st.title('Admin Portal')
-    
+
+    logo_image = Image.open('')
+    st.sidebar.image(logo_image, use_column_width=True)
+
     # Navigation
     menu = ['Create record', 'User Management', 'Patient Management', 'Doctor Management', 'Generate Invoice']
     choice = st.sidebar.selectbox('Select Feature', menu)  
