@@ -275,42 +275,13 @@ def generate_invoice(patient_id):
         return invoice
     else:
         return "Patient or doctor not found"
-    
-    # Function to authenticate user
-def authenticate_user(username, password):
-    conn = create_connection()
-    with conn:
-        cursor = conn.cursor()
-        cursor.execute("SELECT * FROM Users WHERE username=%s", (username,))
-        user = cursor.fetchone()
-        if user and pbkdf2_sha256.verify(password, user[3]):  # user[3] contains hashed password
-            return True
-        else:
-            return False
-
-# Sign-in page
-def sign_in():
-    st.title('Sign In')
-    username = st.text_input('Username')
-    password = st.text_input('Password', type='password')
-    if st.button('Sign In'):
-        if authenticate_user(username, password):
-            st.success('Sign in successful!')
-            main()  # Redirect to main page upon successful sign-in
-        else:
-            st.error('Invalid username or password')
-
 # Main function to run the Streamlit app
 def main():
     create_table(create_connection())
     st.title('Admin Portal')
-    # Check if user is signed in
-    if 'is_signed_in' not in st.session_state:
-        st.session_state.is_signed_in = False
-
-    if st.session_state.is_signed_in:
+    
     # Navigation
-        menu = ['Create record', 'User Management', 'Patient Management', 'Doctor Management', 'Generate Invoice']
+    menu = ['Create record', 'User Management', 'Patient Management', 'Doctor Management', 'Generate Invoice']
     choice = st.sidebar.selectbox('Select Feature', menu)  
 
     if choice == 'Create record':
