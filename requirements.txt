@@ -1,0 +1,4 @@
+pandas==2.2.1
+passlib==1.7.4
+psycopg2==2.9.9
+streamlit==1.31.1
