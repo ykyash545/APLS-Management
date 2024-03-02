@@ -275,18 +275,103 @@ def generate_invoice(patient_id):
         return invoice
     else:
         return "Patient or doctor not found"
+
+
+# Function to create the inventory table if it doesn't exist
+def create_inventory_table(conn):
+    query = '''
+    CREATE TABLE IF NOT EXISTS inventory (
+        id SERIAL PRIMARY KEY,
+        item_name VARCHAR(255) NOT NULL,
+        quantity INT NOT NULL
+    )
+    '''
+    conn.cursor().execute(query)
+    conn.commit()
+
+# Function to add a new item to the inventory
+def add_inventory_item(item_name, quantity):
+    conn = create_connection()
+    with conn:
+        cursor = conn.cursor()
+        cursor.execute("INSERT INTO inventory (item_name, quantity) VALUES (%s, %s)",
+                       (item_name, quantity))
+        st.success('Inventory item added successfully!')
+
+# Function to view all items in the inventory
+def view_inventory():
+    conn = create_connection()
+    with conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM inventory")
+        rows = cursor.fetchall()
+    if not rows:
+        st.warning('No items in inventory!')
+    else:
+        st.write('## Inventory')
+        for row in rows:
+            st.write(f"**ID:** {row[0]}, **Item Name:** {row[1]}, **Quantity:** {row[2]}")
+
+# Function to update quantity of an item in the inventory
+def update_inventory_item(item_id, new_quantity):
+    conn = create_connection()
+    with conn:
+        cursor = conn.cursor()
+        cursor.execute("UPDATE inventory SET quantity=%s WHERE id=%s",
+                       (new_quantity, item_id))
+        st.success('Inventory item quantity updated successfully!')
+
+# Function to delete an item from the inventory
+def delete_inventory_item(item_id):
+    conn = create_connection()
+    with conn:
+        cursor = conn.cursor()
+        cursor.execute("DELETE FROM inventory WHERE id=%s", (item_id,))
+        st.success('Inventory item deleted successfully!')
+
+
 # Main function to run the Streamlit app
 def main():
     create_table(create_connection())
+    create_inventory_table(create_connection())
 
     st.title('Admin Portal')
 
-    logo_image = Image.open('alps-logo.png')
+    logo_image = Image.open('D:\\Back up 2024 Jan\\ALPS PROJECT\\Admin Portal\\alps-logo.png')
     st.sidebar.image(logo_image, use_column_width=True)
 
     # Navigation
-    menu = ['Create record', 'User Management', 'Patient Management', 'Doctor Management', 'Generate Invoice']
+    menu = ['Create record', 'User Management', 'Patient Management', 'Doctor Management', 'Generate Invoice', 'Inventory']
     choice = st.sidebar.selectbox('Select Feature', menu)  
+    
+    if choice == 'Inventory':
+        st.title('Inventory Management')
+        menu = ['Add Item', 'View Inventory', 'Update Item Quantity', 'Delete Item']
+        sub_choice = st.sidebar.selectbox('Menu', menu)
+
+        if sub_choice == 'Add Item':
+            st.header('Add New Inventory Item')
+            item_name = st.text_input('Enter Item Name')
+            quantity = st.number_input('Enter Quantity', min_value=0, step=1)
+            if st.button('Add Item'):
+                add_inventory_item(item_name, quantity)
+
+        elif sub_choice == 'View Inventory':
+            st.header('View Inventory')
+            view_inventory()
+
+        elif sub_choice == 'Update Item Quantity':
+            st.header('Update Inventory Item Quantity')
+            item_id = st.number_input('Enter ID of Item to Update', min_value=1, step=1)
+            new_quantity = st.number_input('Enter New Quantity', min_value=0, step=1)
+            if st.button('Update Quantity'):
+                update_inventory_item(item_id, new_quantity)
+
+        elif sub_choice == 'Delete Item':
+            st.header('Delete Inventory Item')
+            item_id = st.number_input('Enter ID of Item to Delete', min_value=1, step=1)
+            if st.button('Delete Item'):
+                delete_inventory_item(item_id)
 
     if choice == 'Create record':
         st.title('record management')
