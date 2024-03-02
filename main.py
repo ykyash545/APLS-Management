@@ -337,7 +337,7 @@ def main():
 
     st.title('Admin Portal')
 
-    logo_image = Image.open('D:\\Back up 2024 Jan\\ALPS PROJECT\\Admin Portal\\alps-logo.png')
+    logo_image = Image.open('alps-logo.png')
     st.sidebar.image(logo_image, use_column_width=True)
 
     # Navigation
