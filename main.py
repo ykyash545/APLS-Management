@@ -1,3 +1,4 @@
+import io
 import streamlit as st
 import psycopg2
 import pandas as pd
@@ -283,27 +284,27 @@ def create_inventory_table(conn):
     CREATE TABLE IF NOT EXISTS inventory (
         id SERIAL PRIMARY KEY,
         item_name VARCHAR(255) NOT NULL,
-        quantity INT NOT NULL
+        quantity INT NOT NULL,
+        image BYTEA
     )
     '''
     conn.cursor().execute(query)
     conn.commit()
 
 # Function to add a new item to the inventory
-def add_inventory_item(item_name, quantity):
+def add_inventory_item(item_name, quantity, image_bytes):
     conn = create_connection()
     with conn:
         cursor = conn.cursor()
-        cursor.execute("INSERT INTO inventory (item_name, quantity) VALUES (%s, %s)",
-                       (item_name, quantity))
+        cursor.execute("INSERT INTO inventory (item_name, quantity, image) VALUES (%s, %s, %s)",
+                       (item_name, quantity, image_bytes))
         st.success('Inventory item added successfully!')
-
 # Function to view all items in the inventory
 def view_inventory():
     conn = create_connection()
     with conn:
         cursor = conn.cursor()
-        cursor.execute("SELECT * FROM inventory")
+        cursor.execute("SELECT id, item_name, quantity, image FROM inventory")
         rows = cursor.fetchall()
     if not rows:
         st.warning('No items in inventory!')
@@ -311,6 +312,13 @@ def view_inventory():
         st.write('## Inventory')
         for row in rows:
             st.write(f"**ID:** {row[0]}, **Item Name:** {row[1]}, **Quantity:** {row[2]}")
+            if row[3] is not None:
+                image_bytes = row[3]
+                # Ensure that image_bytes is converted to bytes before passing to st.image()
+                st.image(io.BytesIO(image_bytes), caption=row[1], use_column_width=True)
+            else:
+                st.write("No image available")
+            st.write("\n")
 
 # Function to update quantity of an item in the inventory
 def update_inventory_item(item_id, new_quantity):
@@ -337,7 +345,7 @@ def main():
 
     st.title('Admin Portal')
 
-    logo_image = Image.open('alps-logo.png')
+    logo_image = Image.open('D:\\Back up 2024 Jan\\ALPS PROJECT\\Admin Portal\\alps-logo.png')
     st.sidebar.image(logo_image, use_column_width=True)
 
     # Navigation
@@ -353,8 +361,11 @@ def main():
             st.header('Add New Inventory Item')
             item_name = st.text_input('Enter Item Name')
             quantity = st.number_input('Enter Quantity', min_value=0, step=1)
-            if st.button('Add Item'):
-                add_inventory_item(item_name, quantity)
+            image = st.file_uploader("Upload Image", type=["jpg", "jpeg", "png"])
+            if image is not None:
+                image_bytes = image.read()
+                if st.button('Add Item') and item_name and quantity:
+                    add_inventory_item(item_name, quantity, image_bytes)
 
         elif sub_choice == 'View Inventory':
             st.header('View Inventory')
