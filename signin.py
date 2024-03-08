@@ -59,7 +59,7 @@ def main():
         if user:
             st.success("Successfully signed in!")
             # Redirect or perform actions after successful sign-in
-            subprocess.Popen(["streamlit", "run", "dashboard.py"])
+            st.link_button("Go to DashBoard", "https://dashboard-sahu.onrender.com")
         else:
             st.error("Invalid username or password. Please try again.")
             raise ValueError("Invalid username or password")  # Throw exception for invalid credentials
