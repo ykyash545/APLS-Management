@@ -39,7 +39,7 @@ def insert_user(conn, username, password, email):
 
 def main():
     # Add logo (replace "logo.png" with your logo file path)
-    st.image("D:\\Back up 2024 Jan\\ALPS PROJECT\\Admin Portal\\alps-logo.png", width=450)  # You can adjust the width as needed
+    st.image("alps-logo.png", width=450)  # You can adjust the width as needed
 
     st.title("Let's Get Started:")
     st.title("Sign in into portal")
